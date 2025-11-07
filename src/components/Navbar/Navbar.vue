@@ -15,7 +15,7 @@
       </a-menu-item>
     </a-menu>
 
-    <!-- 二级及以下 -->
+    <!-- 二级及以下菜单 -->
     <div
         v-if="activeSubTree"
         class="submenu-wrapper"
@@ -36,7 +36,7 @@
         </div>
       </div>
 
-      <!-- 三级及以下 -->
+      <!-- 三级及以下菜单 -->
       <div v-if="activeThirdTree" class="submenu-horizontal">
         <div
             v-for="third in activeThirdTree.children"
@@ -80,58 +80,61 @@ const props = defineProps<{
   options: Option[]
 }>()
 
-// 存每个一级菜单的 DOM 引用
+// 存一级菜单的 DOM 引用
 const menuRefs: Record<string, HTMLElement | null> = {}
 const activeSubTree = ref<Option | null>(null)
 const activeThirdTree = ref<Option | null>(null)
 
-// 控制 submenu 的位置
+// submenu 位置样式（改成 fixed）
 const submenuStyle = reactive<CSSProperties>({
-  position: 'absolute',
+  position: 'fixed',
   left: '0px',
   top: '0px',
+  zIndex: 9999,
 })
 
-
+// 显示二级菜单
 const showSubMenu = async (item: Option) => {
   activeSubTree.value = item
   activeThirdTree.value = null
 
-  await nextTick() // 等渲染完再取位置信息
-
+  await nextTick()
   const el = menuRefs[item.value]
-  const navbar = document.querySelector('.navbar-wrapper') as HTMLElement
-
-  if (el && el.getBoundingClientRect && navbar) {
+  if (el && el.getBoundingClientRect) {
     const rect = el.getBoundingClientRect()
-    const navbarRect = navbar.getBoundingClientRect()
-
-    // submenu 相对导航栏定位
-    submenuStyle.left = `${rect.left - navbarRect.left}px`
-    submenuStyle.top = `${rect.bottom - navbarRect.top}px`
+    submenuStyle.left = `${rect.left}px`
+    submenuStyle.top = `${rect.bottom}px`
   }
 }
 
-
+// 显示三级菜单
 const showThirdMenu = (sub: Option) => {
   activeThirdTree.value = sub.children ? sub : null
 }
 
-
+// 隐藏所有菜单
 const hideMenus = () => {
   activeSubTree.value = null
   activeThirdTree.value = null
 }
 
-
+// 点击选中项
 const handleSelect = (val: string) => {
   props.onChange(val)
 }
 </script>
 
 <style scoped>
+/* 避免因滚动条出现造成页面抖动 */
+html,
+body {
+  overflow-y: scroll;
+}
+
 .navbar-wrapper {
   position: relative;
+  background: #fff;
+  z-index: 1000;
 }
 
 .top-menu {
@@ -141,13 +144,14 @@ const handleSelect = (val: string) => {
 }
 
 .submenu-wrapper {
-  position: absolute;
+  position: fixed;
   display: flex;
   background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 100;
+  z-index: 1000;
 }
 
+/* 二级菜单 */
 .submenu-vertical {
   color: #000;
   background: #f3f5f7;
@@ -165,17 +169,20 @@ const handleSelect = (val: string) => {
 .submenu-item:hover {
   color: #165dff;
 }
+
+/* 三级及以下 */
 .submenu-horizontal {
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
   gap: 4px;
   padding: 4px;
-  width: 681px;
-  height: 611px;
+  width: 660px;
+  max-height: 611px;
   background: #fff;
   box-sizing: border-box;
   overflow-y: auto;
+  scrollbar-gutter: stable; /* 防止页面跳动 */
 }
 
 .third-block {
@@ -187,12 +194,19 @@ const handleSelect = (val: string) => {
   color: #102490;
   padding: 4px 8px;
   margin-bottom: 4px;
+  transition: all 0.2s;
+}
+
+.third-title:hover {
+  background-color: #102490;
+  color: #f2f3f9;
 }
 
 .fourth-item {
   background-color: #f3f5f7;
   padding: 4px 8px;
   cursor: pointer;
+  transition: color 0.2s;
 }
 
 .fourth-item:hover {
@@ -204,3 +218,4 @@ const handleSelect = (val: string) => {
   font-size: 12px;
 }
 </style>
+`

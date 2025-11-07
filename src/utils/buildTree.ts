@@ -4,7 +4,7 @@ export const buildTree = (list:any[]) => {
     list.forEach((item) => {
         map[item.id] = {
             key: item.id,
-            title: item.categoryName,
+            title: item.categoryName||item.name,
             ...item,
             children: []
         };

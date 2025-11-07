@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="test">
     <Child :msg="message"></Child>
   </div>
 </template>
@@ -8,3 +8,9 @@
 import Child from '../components/Test/TestProps.vue'
 const message = '你好，我是父组件传来的内容'
 </script>
+
+<style scoped>
+.test{
+  color:#000000;
+}
+</style>

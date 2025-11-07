@@ -1,6 +1,5 @@
 <template>
   <div class="home-page">
-    <a-button type="primary" @click="handleQuery">查询</a-button>
     <Navbar
         v-if="options.length"
         :value="selectedValue"
@@ -11,10 +10,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import axios from 'axios'
+import { ref, onMounted } from 'vue'
 import Navbar from '@/components/Navbar/Navbar.vue'
-import { buildTree } from '@/utils/buildTree'
+import { getCategoryList } from '@/api/category.ts'
+import { buildTree } from '@/utils/buildTree.ts'
 
 interface Category {
   id: string
@@ -27,32 +26,16 @@ interface Category {
 const selectedValue = ref('')
 const options = ref<any[]>([])
 
-const query = `
-{
-  searchCategory(condition: {
-    orders: [{ field: "createTime", order: "asc" }],
-    queries: { field: "categoryType", type: "equals", values: "PRODUCT" }
-  }) {
-    list {
-      id
-      categoryName
-      parentId
-      itemCount
-    }
-  }
-}`
+//  页面加载时调用接口
+onMounted(async () => {
+  await loadCategories()
+})
 
-const handleQuery = async () => {
+// 封装查询逻辑
+const loadCategories = async () => {
   try {
-    const res = await axios.post('/api/graphql', { query }, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-    const rawList = res.data.data.searchCategory.list
+    const rawList = await getCategoryList()
     const tree = buildTree(rawList)
-
     options.value = tree.map((item: Category) => ({
       label: item.categoryName,
       value: item.id,
@@ -69,12 +52,12 @@ const handleQuery = async () => {
         }))
       }))
     }))
-
   } catch (err) {
-    console.error('查询失败', err)
+    console.error('分类查询失败', err)
   }
 }
 
+// 接收 Navbar 的回调
 const handleChange = (val: string) => {
   selectedValue.value = val
   console.log('选中项：', val)
