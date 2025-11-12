@@ -26,5 +26,6 @@ export const getCategoryList = async () => {
             },
         }
     )
+    console.log('接口返回:', res.data)
     return res.data.data.searchCategory.list
 }

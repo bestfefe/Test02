@@ -4,8 +4,9 @@
     <div class="menu-wrapper">
       <!--Logo-->
       <div class="logo-area">
-        <img src="@/assets/logo.png" alt="Logo" class="logo-img"/>
+        <img src="@/assets/logo.png" alt="Logo" class="logo-img" />
       </div>
+
       <a-menu
           mode="pop"
           theme="dark"
@@ -16,26 +17,21 @@
       >
         <template v-for="menu in menuData" :key="menu.id">
           <!-- 有子菜单 -->
-          <a-sub-menu
-              v-if="menu.children?.length"
-              :key="menu.id + '-submenu'"
-          >
+          <a-sub-menu v-if="menu.children?.length" :key="menu.id + '-submenu'">
             <template #title>
               {{ menu.title }}
             </template>
             <a-menu-item
                 v-for="child in menu.children"
                 :key="child.id + '-item'"
+                @click="go(child.url)"
             >
               {{ child.title }}
             </a-menu-item>
           </a-sub-menu>
 
           <!-- 没有子菜单 -->
-          <a-menu-item
-              v-else
-              :key="menu.id + '-item'"
-          >
+          <a-menu-item v-else :key="menu.id + '-item'" @click="go(menu.url)">
             {{ menu.title }}
           </a-menu-item>
         </template>
@@ -51,11 +47,34 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { getMenuList } from "@/api/menu.ts";
-import { buildTree } from "@/utils/buildTree.ts";
+import { getMenuList } from "@/api/menu";
+import { buildTree } from "@/utils/buildTree";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const menuData = ref<any[]>([]);
 
+/**
+ * 点击菜单跳转
+ */
+const go = (url: string) => {
+  if (!url) return;
+
+  // ✅ 确保路径以 "/" 开头
+  const path = url.startsWith("/") ? url : `/${url}`;
+
+  console.log("跳转路径至：", path);
+
+  try {
+    router.push(path);
+  } catch (err) {
+    console.warn("⚠️ 路由跳转失败：", err);
+  }
+};
+
+/**
+ * 页面加载时获取菜单数据
+ */
 onMounted(async () => {
   const res = await getMenuList();
   if (res.success) {
@@ -68,14 +87,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.logo-area{
+.logo-area {
   background-color: #232324;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 48px;
 }
-.logo-img{
+.logo-img {
   height: 32px;
   width: 32px;
 }
@@ -103,7 +122,7 @@ onMounted(async () => {
 
 .menu-wrapper :deep(.arco-menu) {
   height: 100%;
-  width: 100%!important;
+  width: 100% !important;
   border: none;
   box-shadow: none;
   flex: 1;
