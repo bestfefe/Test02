@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Layout from '@/views/Layout.vue'
 import { getMenuList } from '@/api/menu'
 import { buildTree } from '@/utils/buildTree'
+import { useTagsViewStore } from '@/store/tagsView.ts'
 
 // 基础静态路由
 const routes = [
@@ -109,6 +110,12 @@ router.beforeEach(async (to, _from, next) => {
 
     // 正常放行
     next()
+})
+router.afterEach((to) => {
+    if (to.path === '/' || to.name === 'Login') return
+
+    const tagsStore = useTagsViewStore()
+    tagsStore.addView(to)
 })
 
 export default router
