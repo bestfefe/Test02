@@ -29,7 +29,11 @@ const routes = [
                 path: '/TestApi',
                 name: 'TestApi',
                 component: () => import('@/views/TestApi.vue'),
-            },
+            },{
+                path:'/AddApproval',
+                name:'产品新增',
+                component:() => import('@/views/a-menu/ProductCenter/ProductBaseInfoProductApproval/components/AddApproval.vue')
+            }
         ],
     },
 ]

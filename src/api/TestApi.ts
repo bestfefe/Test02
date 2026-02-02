@@ -1,3 +1,4 @@
+// src/api/TestApi.ts
 import axios from 'axios'
 
 const testService = axios.create({
@@ -27,6 +28,7 @@ export const testGraphql = async (query: string, variables = {}) => {
         throw err
     }
 }
+
 const FULL_QUERY = `
 fragment UserFragment on User {
   needChange
@@ -158,6 +160,64 @@ query searchSupplier($condition: ListQueryParam!) {
 }
 `;
 
+// 产品库查询
+const PRODUCT_LIBRARY_QUERY = `
+  query getProductLibrary {
+    searchApprovalProduct(
+      condition: {
+        pageIndex: 1
+        pageSize: 1000
+        queries: [
+          {
+            field: "isSourceProductLibrary"
+            type: "isTrue"
+            negate: false
+          }
+          {
+            field: "productLibraryStatus"
+            type: "equals"
+            values: "UNUSED"
+          }
+        ]
+        orders: [
+          {
+            field: "createTime"
+            order: "desc"
+          }
+        ]
+      }
+    ) {
+      list {
+        id
+        sku
+      }
+    }
+  }
+`;
+
+// SKU查询
+const PRODUCT_SKU_QUERY = `
+  query getProductSku {
+    searchApprovalProduct(
+      condition: {
+        pageIndex: 1
+        pageSize: 1000
+        orders: [
+          {
+            field: "createTime"
+            order: "desc"
+          }
+        ]
+      }
+    ) {
+      list {
+        id
+        sku
+      }
+    }
+  }
+`;
+
 export const testSearchSupplier = async () => {
     const variables = {
         condition: {
@@ -169,5 +229,19 @@ export const testSearchSupplier = async () => {
 
     const data = await testGraphql(FULL_QUERY, variables)
     console.log("测试 searchSupplier 返回：", data)
+    return data
+}
+
+// 测试产品库查询
+export const testProductLibrary = async () => {
+    const data = await testGraphql(PRODUCT_LIBRARY_QUERY, {})
+    console.log("测试产品库返回：", data)
+    return data
+}
+
+// 测试SKU查询
+export const testProductSku = async () => {
+    const data = await testGraphql(PRODUCT_SKU_QUERY, {})
+    console.log("测试SKU返回：", data)
     return data
 }

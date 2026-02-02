@@ -17,13 +17,11 @@
       >
         <template v-for="menu in menuData" :key="menu.id">
           <!-- 有子菜单 -->
-          <a-sub-menu
-              v-if="menu.children?.length"
-              :key="menu.id + '-submenu'"
-          >
+          <a-sub-menu v-if="menu.children?.length" :key="menu.id + '-submenu'">
             <template #title>
               {{ menu.title }}
             </template>
+
             <a-menu-item
                 v-for="child in menu.children"
                 :key="child.id + '-item'"
@@ -34,21 +32,16 @@
           </a-sub-menu>
 
           <!-- 没有子菜单 -->
-          <a-menu-item
-              v-else
-              :key="menu.id + '-item'"
-              @click="go(menu.url)"
-          >
+          <a-menu-item v-else :key="menu.id + '-item'" @click="go(menu.url)">
             {{ menu.title }}
           </a-menu-item>
         </template>
       </a-menu>
     </div>
 
-    <!-- 右侧主内容 -->
+    <!-- 右侧主内容（外壳冻结，不随滚动） -->
     <div class="content-wrapper">
-
-      <!-- 多标签栏（Tabs）-->
+      <!-- 多标签栏（Tabs）固定不动 -->
       <a-tabs
           type="card"
           :active-key="activePath"
@@ -56,15 +49,11 @@
           class="tabs-bar"
           hide-content
       >
-        <a-tab-pane
-            v-for="tab in tagsStore.visitedViews"
-            :key="tab.path"
-        >
-          <!-- 使用自定义标题模板 -->
+        <a-tab-pane v-for="tab in tagsStore.visitedViews" :key="tab.path">
           <template #title>
             <div class="custom-tab-title">
               <span class="tab-text">{{ tab.title }}</span>
-              <!-- 根据 closable 字段显示关闭按钮 -->
+
               <a-button
                   v-if="tab.closable !== false"
                   type="text"
@@ -72,7 +61,6 @@
                   class="tab-close-btn"
                   @click.stop="handleTabClose(tab.path)"
               >
-                <!-- 使用关闭图标 -->
                 <IconClose />
               </a-button>
             </div>
@@ -80,34 +68,30 @@
         </a-tab-pane>
       </a-tabs>
 
-      <!-- 当前路由显示区域 -->
-      <router-view />
+      <!-- ✅ 当前路由显示区域：只让这里滚动 -->
+      <div class="page-container">
+        <router-view />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from "vue";
-import { getMenuList } from "@/api/menu";
-import { buildTree } from "@/utils/buildTree";
-import { useRouter, useRoute } from "vue-router";
-import { useTagsViewStore } from "@/store/tagsView";
+import { ref, onMounted, computed, watch } from 'vue';
+import { getMenuList } from '@/api/menu';
+import { buildTree } from '@/utils/buildTree';
+import { useRouter, useRoute } from 'vue-router';
+import { useTagsViewStore } from '@/store/tagsView';
 import { IconClose } from '@arco-design/web-vue/es/icon';
 
-// Router
 const router = useRouter();
 const route = useRoute();
 
-// 菜单数据
 const menuData = ref<any[]>([]);
-
-// 标签页 Store
 const tagsStore = useTagsViewStore();
 
-// 当前激活路由 path
 const activePath = computed(() => route.path);
 
-// 监听路由变化，自动添加标签页
 watch(
     () => route.path,
     (newPath) => {
@@ -118,53 +102,41 @@ watch(
     { immediate: true }
 );
 
-/** 点击左侧菜单跳转 */
 const go = (url: string) => {
   if (!url) return;
-
-  const path = url.startsWith("/") ? url : `/${url}`;
+  const path = url.startsWith('/') ? url : `/${url}`;
   router.push(path);
 };
 
-/** Tab 切换 */
 const handleTabChange = (path: string) => {
   router.push(path);
 };
 
-/** Tab 关闭 */
 const handleTabClose = (path: string) => {
-  // 防止关闭固定标签页
-  const tab = tagsStore.visitedViews.find(view => view.path === path);
-  if (tab && tab.closable === false) {
-    return;
-  }
+  const tab = tagsStore.visitedViews.find((view) => view.path === path);
+  if (tab && tab.closable === false) return;
 
   tagsStore.removeView(path);
 
-  // 如果关闭的是当前页，则跳转到其他标签
   if (path === route.path) {
-    const remainingViews = tagsStore.visitedViews.filter(view => view.path !== path);
+    const remainingViews = tagsStore.visitedViews.filter((view) => view.path !== path);
     if (remainingViews.length > 0) {
-      // 跳转到最后一个标签
       const last = remainingViews[remainingViews.length - 1];
       if (last) router.push(last.path);
       else router.push('/home');
     } else {
-      // 没有其他标签时跳转到首页
-      router.push("/home");
+      router.push('/home');
     }
   }
 };
 
-/** 初始化加载菜单 */
 onMounted(async () => {
   const res = await getMenuList();
   if (res.success) {
     menuData.value = buildTree(res.data);
   }
 
-  // 确保首页标签存在
-  if (route.path === '/home' && !tagsStore.visitedViews.some(v => v.path === '/home')) {
+  if (route.path === '/home' && !tagsStore.visitedViews.some((v) => v.path === '/home')) {
     tagsStore.addView(route);
   }
 });
@@ -183,6 +155,7 @@ onMounted(async () => {
   width: 32px;
 }
 
+/* 整体外壳固定 */
 .layout-container {
   display: flex;
   height: 100vh;
@@ -213,17 +186,31 @@ onMounted(async () => {
   flex: 1;
 }
 
-/* 右侧内容区 */
+/* ✅ 右侧内容区：冻结外壳，不滚动 */
 .content-wrapper {
   flex: 1;
   background-color: #fff;
-  overflow-y: auto;
   padding: 6px;
+  box-sizing: border-box;
+
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden; /* ✅ 关键：不让整个右侧滚 */
 }
 
-/* Tabs 样式优化 */
+/* Tabs 固定在顶部 */
 .tabs-bar {
+  flex: 0 0 auto;
   margin-bottom: 12px;
+}
+
+/* ✅ 只让页面内容滚动 */
+.page-container {
+  flex: 1 1 auto;
+  overflow: auto; /* ✅ 滚动发生在这里 */
+  min-height: 0;  /* ✅ 关键：允许在 flex 容器中滚动 */
 }
 
 /* 自定义标签页标题样式 */
@@ -262,5 +249,4 @@ onMounted(async () => {
   flex-shrink: 0 !important;
   display: inline-block;
 }
-
 </style>

@@ -16,136 +16,144 @@
 
         <!-- 第二行：模式切换 + 下拉筛选 -->
         <div class="control-bar">
-          <!-- 模式切换按钮 -->
-          <div class="button-group-wrapper">
-            <a-button-group>
-              <a-button
-                  :type="mode === 'SKU' ? 'primary' : 'outline'"
-                  :class="['switch-btn', { active: mode === 'SKU' }]"
-                  @click="setMode('SKU')"
-              >
-                SKU
-              </a-button>
+          <!-- 将模式切换按钮和筛选条件放在同一个div中 -->
+          <div class="control-bar-inner">
+            <!-- 模式切换按钮 -->
+            <div class="button-group-wrapper">
+              <div class="sku-spu-switch">
+                <a-button-group>
+                  <a-button
+                      :type="mode === 'SKU' ? 'primary' : 'outline'"
+                      :class="['switch-btn', { active: mode === 'SKU' }]"
+                      @click="setMode('SKU')"
+                  >
+                    SKU
+                  </a-button>
 
-              <a-button
-                  :type="mode === 'SPU' ? 'primary' : 'outline'"
-                  :class="['switch-btn', { active: mode === 'SPU' }]"
-                  @click="setMode('SPU')"
-              >
-                SPU
-              </a-button>
-            </a-button-group>
-          </div>
-
-          <!-- 第一行：所有现有的筛选条件保持不变 -->
-          <div class="filter-container">
-            <div class="filter-group">
-              <!-- 现有的筛选字段选择 -->
-              <a-select
-                  v-model="filterField"
-                  :options="filterOptions"
-                  style="width: 100px"
-                  placeholder="筛选字段"
-                  size="small"
-              />
-
-              <!-- 现有的查询方式选择 -->
-              <a-select
-                  v-model="searchType"
-                  :options="searchTypeOptions"
-                  style="width:90px"
-                  placeholder="查询方式"
-                  size="small"
-              />
-
-              <!-- 现有的搜索输入框 -->
-              <a-input-search
-                  v-model="searchValue"
-                  placeholder="请输入内容查询"
-                  style="width:130px"
-                  size="small"
-                  @press-enter="applyFilter"
-              />
-
-              <!-- 国家筛选 -->
-              <div class="arco-input-group country-filter-group" size="small">
-                <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 3em;">
-                  <input class="arco-input arco-input-size-small" type="text" disabled value="国家">
-                </span>
-                <a-select
-                    v-model="selectedCountry"
-                    :options="countryOptions"
-                    placeholder="请选择"
-                    style="width: 100px"
-                    size="small"
-                    allow-clear
-                    :loading="countryLoading"
-                />
-              </div>
-
-              <!-- 审批类型筛选 -->
-              <div class="arco-input-group approval-type-filter-group" size="small">
-                <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 4em;">
-                  <input class="arco-input arco-input-size-small" type="text" disabled value="审批类型">
-                </span>
-                <a-select
-                    v-model="selectedApprovalType"
-                    :options="approvalTypeOptions"
-                    placeholder="请选择"
-                    style="width: 100px"
-                    size="small"
-                    allow-clear
-                />
-              </div>
-
-              <!-- 树形选择器 -->
-              <div class="arco-input-group category-filter-group" size="small">
-                <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 3em;">
-                  <input class="arco-input arco-input-size-small" type="text" disabled value="分类">
-                </span>
-                <a-tree-select
-                    v-model="selectedCategory"
-                    :data="categoryTree"
-                    placeholder="分类"
-                    style="width: 160px"
-                    size="small"
-                    allow-clear
-                    :loading="categoryLoading"
-                    :field-names="{ key: 'value', title: 'label' }"
-                    :tree-props="{
-                      virtualListProps: { height: 300 },
-                      height: 300,
-                      defaultExpandAll: false
-                    }"
-                    @change="handleCategoryChange"
-                />
-              </div>
+                  <a-button
+                      :type="mode === 'SPU' ? 'primary' : 'outline'"
+                      :class="['switch-btn', { active: mode === 'SPU' }]"
+                      @click="setMode('SPU')"
+                  >
+                  SPU
+                </a-button>
+              </a-button-group>
+                </div>
             </div>
 
-            <!-- 按钮组靠在右侧 -->
-            <div class="filter-buttons">
-              <!-- 新增：展开/收起按钮 -->
-              <a-button
-                  type="outline"
-                  size="small"
-                  @click="toggleExpand"
-                  :class="['expand-btn', { 'expand-btn--expanded': isExpanded }]"
-              >
-                {{ isExpanded ? '收起' : '更多' }}
-                <template #icon>
-                  <icon-down :class="['expand-icon', { 'expand-icon--rotated': isExpanded }]" />
-                </template>
-              </a-button>
+            <!-- 筛选条件 -->
+            <div class="filter-container">
+              <div class="filter-group">
 
-              <!-- 现有的查询按钮 -->
-              <a-button type="primary" size="small" @click="applyFilter">
-                查询
-              </a-button>
+                <!-- 组合搜索框（SKU + 查询方式 + 输入框） -->
+                <div class="search-combo">
+                  <a-select
+                      v-model="filterField"
+                      :options="filterOptions"
+                      class="search-combo-item"
+                      style="width: 100px"
+                      size="small"
+                  />
 
-              <!-- 现有的重置按钮 -->
-              <a-button size="small" @click="resetFilter" style="margin-left: 8px;">
-                重置
-              </a-button>
+                  <a-select
+                      v-model="searchType"
+                      :options="searchTypeOptions"
+                      class="search-combo-item"
+                      style="width: 100px"
+                      size="small"
+                  />
+
+                  <a-input-search
+                      v-model="searchValue"
+                      placeholder="请输入内容查询"
+                      class="search-combo-item"
+                      style="width: 250px"
+                      size="small"
+                      @press-enter="applyFilter"
+                  />
+                </div>
+
+
+                <!-- 国家筛选 -->
+                <div class="arco-input-group country-filter-group" size="small">
+                  <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 6em;">
+                    <input class="arco-input arco-input-size-small" type="text" disabled value="国家">
+                  </span>
+                  <a-select
+                      v-model="selectedCountry"
+                      :options="countryOptions"
+                      placeholder="请选择"
+                      style="width: 140px"
+                      size="small"
+                      allow-clear
+                      :loading="countryLoading"
+                  />
+                </div>
+
+                <!-- 审批类型筛选 -->
+                <div class="arco-input-group approval-type-filter-group" size="small">
+                  <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 8em;">
+                    <input class="arco-input arco-input-size-small" type="text" disabled value="审批类型">
+                  </span>
+                  <a-select
+                      v-model="selectedApprovalType"
+                      :options="approvalTypeOptions"
+                      placeholder="请选择"
+                      style="width: 120px"
+                      size="small"
+                      allow-clear
+                  />
+                </div>
+
+                <!-- 树形选择器 -->
+                <div class="arco-input-group category-filter-group" size="small">
+                  <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 6em;">
+                    <input class="arco-input arco-input-size-small" type="text" disabled value="分类">
+                  </span>
+                  <a-tree-select
+                      v-model="selectedCategory"
+                      :data="categoryTree"
+                      placeholder="请选择"
+                      style="width: 220px"
+                      size="small"
+                      allow-clear
+                      :loading="categoryLoading"
+                      :field-names="{ key: 'value', title: 'label' }"
+                      :tree-props="{
+                        virtualListProps: { height: 300 },
+                        height: 300,
+                        defaultExpandAll: false
+                      }"
+                      @change="handleCategoryChange"
+                  />
+                </div>
+              </div>
+
+              <!-- 按钮组靠在右侧 -->
+              <div class="filter-buttons">
+                <!-- 新增：展开/收起按钮 -->
+                <a-button
+                    type="outline"
+                    size="small"
+                    @click="toggleExpand"
+                    :class="['expand-btn', { 'expand-btn--expanded': isExpanded }]"
+                >
+                  {{ isExpanded ? '收起' : '更多' }}
+                  <template #icon>
+                    <icon-down :class="['expand-icon', { 'expand-icon--rotated': isExpanded }]" />
+                  </template>
+                </a-button>
+
+                <!-- 现有的查询按钮 -->
+                <a-button type="primary" size="small" @click="applyFilter">
+                  查询
+                </a-button>
+
+                <!-- 现有的重置按钮 -->
+                <a-button size="small" @click="resetFilter" style="margin-left: 8px;">
+                  重置
+                </a-button>
+              </div>
             </div>
           </div>
         </div>
@@ -155,14 +163,14 @@
           <div class="filter-row">
             <!-- 供应商筛选 -->
             <div class="arco-input-group supplier-filter-group" size="small">
-              <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 4em;">
+              <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 7em;">
                 <input class="arco-input arco-input-size-small" type="text" disabled value="供应商">
               </span>
               <a-select
                   v-model="selectedSupplier"
                   :options="supplierOptions"
                   placeholder="请选择供应商"
-                  style="width: 160px"
+                  style="width: 200px"
                   size="small"
                   allow-clear
                   :loading="supplierLoading"
@@ -172,14 +180,14 @@
 
             <!-- 用户筛选 -->
             <div class="arco-input-group user-filter-group" size="small">
-              <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 4em;">
+              <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 7em;">
                 <input class="arco-input arco-input-size-small" type="text" disabled value="创建人">
               </span>
               <a-select
                   v-model="selectedUser"
                   :options="userOptions"
                   placeholder="请选择创建人"
-                  style="width: 160px"
+                  style="width: 220px"
                   size="small"
                   allow-clear
                   :loading="userLoading"
@@ -189,14 +197,14 @@
 
             <!-- 品牌筛选 -->
             <div class="arco-input-group brand-filter-group" size="small">
-              <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 3em;">
+              <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 6em;">
                 <input class="arco-input arco-input-size-small" type="text" disabled value="品牌">
               </span>
               <a-select
                   v-model="selectedBrand"
                   :options="brandOptions"
                   placeholder="请选择品牌"
-                  style="width: 140px"
+                  style="width: 180px"
                   size="small"
                   allow-clear
                   :loading="brandLoading"
@@ -226,7 +234,7 @@
               </a-dropdown>
               <a-range-picker
                   v-model="dateRange"
-                  style="width: 210px; border-left: none; border-radius: 0 6px 6px 0;"
+                  style="width: 240px; border-left: none; border-radius: 0 6px 6px 0;"
                   size="small"
                   :placeholder="['开始日期', '结束日期']"
                   allow-clear
@@ -239,7 +247,7 @@
 
             <!-- 混发组筛选（移动到日期筛选的右边） -->
             <div class="arco-input-group mixture-release-filter-group" size="small">
-              <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 4em;">
+              <span class="arco-input-wrapper arco-input-disabled search-group-input" style="width: 7em;">
                 <input class="arco-input arco-input-size-small" type="text" disabled value="混发组">
               </span>
               <a-select
@@ -259,6 +267,12 @@
 
       <!-- 表格部分 -->
       <a-card>
+        <!-- 顶部分割线 -->
+        <div class="card-divider"></div>
+        <!-- 添加按钮部分 -->
+        <div class="table-actions">
+          <AddEntry />
+        </div>
         <a-table
             :data="filteredListData"
             :columns="columns"
@@ -316,10 +330,11 @@ import {
   type User,
   type Brand,
   type MixtureRelease
-} from "@/api/approvalProduct";
+} from "@/api/approvalProduct.ts";
 import { IconDown } from '@arco-design/web-vue/es/icon';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
+import AddEntry from './ProductBaseInfoProductApproval/components/AddEntry.vue';
 dayjs.extend(isBetween);
 
 /* ========== 类型定义 ========== */
@@ -1333,18 +1348,23 @@ const rowSelection = {
 
 /* 控制栏整体样式 */
 .control-bar {
-  display: flex;
-  gap: 8px;
-  align-items: stretch; /* 让子元素高度拉伸一致 */
-  margin-bottom: 12px;
-  min-height: 32px; /* 最小高度确保一致性 */
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
-/* 按钮组包装器 - 确保与其他控件高度对齐 */
+/* 控制栏内部容器 */
+.control-bar-inner {
+  display: flex;
+  gap: 8px;
+  align-items: center; /* 确保所有内容垂直居中 */
+  min-height: 28px;
+}
+
+/* 按钮组包装器 */
 .button-group-wrapper {
   display: flex;
   align-items: center;
-  height: 32px; /* 与筛选控件高度一致 */
+  height: 28px;
   flex-shrink: 0;
 }
 
@@ -1353,22 +1373,22 @@ const rowSelection = {
   display: flex;
   flex: 1;
   justify-content: space-between;
-  align-items: stretch; /* 让内部元素高度拉伸一致 */
+  align-items: center; /* 修改为 center 确保垂直居中 */
   gap: 12px;
   width: 100%;
-  min-height: 32px;
+  min-height: 28px;
 }
 
 /* 筛选组样式 */
 .filter-group {
   display: flex;
   gap: 6px;
-  align-items: center;
+  align-items: center; /* 确保筛选组内元素垂直居中 */
   flex-wrap: nowrap;
   overflow-x: auto;
   padding-bottom: 4px;
   flex: 1;
-  min-height: 32px;
+  min-height: 28px;
 }
 
 /* 确保筛选组内所有控件基线统一 */
@@ -1379,16 +1399,18 @@ const rowSelection = {
 .filter-group .arco-input-group {
   display: flex;
   align-items: center;
-  height: 32px;
+  height: 28px;
   box-sizing: border-box;
+  font-size: 12px;
 }
 
 /* 筛选控件统一高度 */
 .filter-group .arco-select-view,
 .filter-group .arco-input-wrapper,
 .filter-group .arco-tree-select-view {
-  height: 32px;
-  min-height: 32px !important;
+  height: 28px;
+  min-height: 28px !important;
+  font-size: 12px;
 }
 
 .filter-group .arco-select-view-inner,
@@ -1397,40 +1419,49 @@ const rowSelection = {
   display: flex;
   align-items: center;
   height: 100%;
+  font-size: 12px;
 }
 
 /* 输入框组统一高度 */
 .arco-input-group {
-  height: 32px;
-  min-height: 32px;
+  height: 28px;
+  min-height: 28px;
+  font-size: 12px;
 }
 
 .arco-input-group .arco-input-wrapper,
 .arco-input-group .arco-select-view {
-  height: 32px;
-  min-height: 32px;
+  height: 28px;
+  min-height: 28px;
+  font-size: 12px;
 }
 
-/* 按钮组样式 - 靠在右侧 */
+/* 按钮组样式 */
 .filter-buttons {
   display: flex;
-  align-items: center;
+  align-items: center; /* 确保按钮垂直居中 */
   gap: 6px;
   flex-shrink: 0;
   margin-left: auto;
-  height: 32px;
+  height: 28px;
+  font-size: 12px;
+}
+.sku-spu-switch {
+  display: inline-flex;
+  margin-left: 4px;
+  margin-bottom: 4px;
 }
 
 /* 切换按钮样式 - 确保基线对齐 */
 .switch-btn {
-  border-radius: 0;
+  border-radius: 2px !important;
   background: #fff;
   border-color: #e5e6eb ;
-  color: #4e5992 ;
-  padding: 0 12px !important;
-  height: 32px !important;
-  line-height: 30px !important;
-  font-size: 13px;
+  color: #165dff ;
+  padding: 0 15px !important;
+  height: 28px !important;
+  line-height: 22px !important;
+  font-size: 12px;
   box-shadow: none ;
   flex-shrink: 0;
   display: inline-flex;
@@ -1441,17 +1472,17 @@ const rowSelection = {
 
 .switch-btn.active,
 .switch-btn[aria-pressed="true"] {
-  background: #2f54eb ;
+  background: #165dff ;
   color: #fff ;
-  border-color: #2f54eb ;
+  border-color: #165dff ;
   box-shadow: none ;
 }
 
 .switch-btn.arco-btn-primary,
 .switch-btn.arco-btn-primary.active {
-  background: #2f54eb;
+  background: #165dff;
   color: #fff;
-  border-color: #2f54eb;
+  border-color: #165dff;
 }
 
 .switch-btn:first-child {
@@ -1472,19 +1503,19 @@ const rowSelection = {
   transition: all 0.3s ease;
   border-color: #e5e6eb;
   flex-shrink: 0;
-  height: 32px;
+  height: 28px;
   padding: 0 8px;
   font-size: 13px;
 }
 
 .expand-btn:hover {
-  border-color: var(--color-primary-light-hover);
-  color: var(--color-primary-light-hover);
+  border-color: rgb(242, 243, 245);
+  background-color:rgb(242, 243, 245) ;
 }
 
 .expand-btn.expand-btn--expanded {
   border-color: var(--color-primary-light-active);
-  color: var(--color-primary-light-active);
+  color: rgb(var(--primary-5));
 }
 
 .expand-icon {
@@ -1499,7 +1530,7 @@ const rowSelection = {
 
 /* 高级筛选区域样式 */
 .advanced-filters {
-  margin-top: 6px;
+  margin-top: 4px;
   margin-bottom: 18px;
   background-color: white;
 }
@@ -1509,17 +1540,18 @@ const rowSelection = {
   gap: 8px;
   align-items: center;
   flex-wrap: wrap;
+  margin-bottom: 50px;
 }
 
 /* 国家筛选组样式 */
 .country-filter-group {
   display: flex;
   align-items: center;
-  border-radius: 6px;
+  border-radius: 2px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   flex-shrink: 0;
-  height: 32px;
+  height: 28px;
 }
 
 .country-filter-group:hover {
@@ -1535,11 +1567,11 @@ const rowSelection = {
 .approval-type-filter-group {
   display: flex;
   align-items: center;
-  border-radius: 6px;
+  border-radius: 2px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   flex-shrink: 0;
-  height: 32px;
+  height: 28px;
 }
 
 .approval-type-filter-group:hover {
@@ -1555,11 +1587,11 @@ const rowSelection = {
 .category-filter-group {
   display: flex;
   align-items: center;
-  border-radius: 6px;
+  border-radius: 2px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   flex-shrink: 0;
-  height: 32px;
+  height: 28px;
 }
 
 .category-filter-group:hover {
@@ -1575,11 +1607,12 @@ const rowSelection = {
 .supplier-filter-group {
   display: flex;
   align-items: center;
-  border-radius: 6px;
+  border-radius: 2px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   flex-shrink: 0;
-  height: 32px;
+  height: 28px;
+  margin-left: 5px;
 }
 
 .supplier-filter-group:hover {
@@ -1595,11 +1628,11 @@ const rowSelection = {
 .user-filter-group {
   display: flex;
   align-items: center;
-  border-radius: 6px;
+  border-radius: 2px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   flex-shrink: 0;
-  height: 32px;
+  height: 28px;
 }
 
 .user-filter-group:hover {
@@ -1615,11 +1648,11 @@ const rowSelection = {
 .brand-filter-group {
   display: flex;
   align-items: center;
-  border-radius: 6px;
+  border-radius: 2px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   flex-shrink: 0;
-  height: 32px;
+  height: 28px;
 }
 
 .brand-filter-group:hover {
@@ -1635,11 +1668,11 @@ const rowSelection = {
 .mixture-release-filter-group {
   display: flex;
   align-items: center;
-  border-radius: 6px;
+  border-radius: 2px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   flex-shrink: 0;
-  height: 32px;
+  height: 28px;
 }
 
 .mixture-release-filter-group:hover {
@@ -1655,11 +1688,11 @@ const rowSelection = {
 .date-filter-group {
   display: flex;
   align-items: center;
-  border-radius: 6px;
+  border-radius: 2px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   flex-shrink: 0;
-  height: 32px;
+  height: 28px;
 }
 
 .date-filter-group:hover {
@@ -1681,7 +1714,7 @@ const rowSelection = {
   border: 1px solid #e5e6eb;
   border-right: none;
   border-radius: 6px 0 0 6px;
-  height: 32px;
+  height: 28px;
   min-width: 80px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1694,12 +1727,12 @@ const rowSelection = {
 
 .date-type-label {
   font-size: 13px;
-  color: #4e5969;
+  color: #1d2129 ;
   white-space: nowrap;
 }
 
 .date-type-icon {
-  color: #4e5969;
+  color: #1d2129;
   font-size: 12px;
   margin-left: 6px;
   transition: transform 0.3s ease;
@@ -1714,13 +1747,13 @@ const rowSelection = {
   background-color: #f7f8fa;
   border: none;
   border-radius: 0;
-  color: #4e5969;
+  color: #1d2129;
   font-size: 13px;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 32px;
+  height: 28px;
   flex-shrink: 0;
 }
 
@@ -1728,7 +1761,7 @@ const rowSelection = {
   text-align: center;
   background: transparent;
   border: none;
-  color: #4e5969;
+  color: #1d2129;
   font-size: 13px;
 }
 
@@ -1755,10 +1788,10 @@ const rowSelection = {
 .brand-filter-group .arco-select-view,
 .mixture-release-filter-group .arco-select-view {
   border: none;
-  border-radius: 0;
+  border-radius: 2px;
   box-shadow: none;
-  min-height: 32px;
-  height: 32px;
+  min-height: 28px;
+  height: 28px;
 }
 
 /* 日期范围选择器样式调整 */
@@ -1895,9 +1928,9 @@ const rowSelection = {
 
 /* 按钮样式调整 */
 .arco-btn-sm {
-  height: 32px;
-  font-size: 13px;
-  padding: 0 8px;
+  height: 28px !important;
+  font-size: 12px;
+  padding: 0 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1905,24 +1938,29 @@ const rowSelection = {
 
 /* 输入框样式调整 */
 .arco-input-sm {
-  height: 32px;
-  font-size: 13px;
+  height: 28px;
+  font-size: 12px;
 }
 
 /* 选择器样式调整 */
 .arco-select-view-sm {
-  min-height: 32px;
-  height: 32px;
-  font-size: 13px;
+  min-height: 28px;
+  height: 28px;
+  font-size: 12px;
+}
+:deep(.arco-select-view-size-small .arco-select-view-value) {
+  font-size: 12px;
+  line-height: 28px; /* 根据你的需求调整 */
 }
 
 .arco-select-option {
-  font-size: 13px;
+  font-size: 12px;
   padding: 4px 8px;
 }
 </style>
 
 <style>
+
 .approvalProductData .arco-card {
   border-top: none;
 }
@@ -1947,7 +1985,7 @@ const rowSelection = {
 
 .approvalProductData .arco-tree-select-popup::-webkit-scrollbar-thumb {
   background-color: #c9cdd4;
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 .approvalProductData .arco-tree-select-popup::-webkit-scrollbar-track {
@@ -1958,7 +1996,7 @@ const rowSelection = {
 .approvalProductData .arco-dropdown-menu {
   padding: 4px 0;
   border: 1px solid #e5e6eb;
-  border-radius: 6px;
+  border-radius: 2px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   background-color: white;
 }
@@ -1966,7 +2004,7 @@ const rowSelection = {
 .approvalProductData .arco-dropdown-option {
   padding: 6px 10px;
   font-size: 13px;
-  color: #4e5969;
+  color: #1d2129;
 }
 
 .approvalProductData .arco-dropdown-option:hover {
@@ -1982,7 +2020,7 @@ const rowSelection = {
 .approvalProductData .arco-picker-panel {
   max-width: 300px;
   border: 1px solid #e5e6eb;
-  border-radius: 6px;
+  border-radius: 2px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   font-size: 13px;
 }
@@ -2030,7 +2068,7 @@ const rowSelection = {
 
 /* 调整卡片内边距 */
 .approvalProductData .arco-card-body {
-  padding: 12px;
+  padding: 0;
 }
 
 /* 调整Tabs样式 */
@@ -2039,6 +2077,90 @@ const rowSelection = {
 }
 
 .approvalProductData .arco-tabs-tab {
-  padding: 8px 12px;
+  margin: 0 16px;
+  padding: 8px 0;
+  line-height: 1.5715;
 }
+.approvalProductData .arco-tabs-tab-title {
+  color: #0b1019 !important;
+  font-size: 12px !important;
+}
+.arco-card-size-medium .arco-card-body {
+  padding: 0 0 !important;
+}
+.arco-tabs-tab-active, .arco-tabs-tab-active:hover {
+  background: #fff;
+  color: #1d2129;
+}
+.arco-tabs-content {
+  padding-top: 0 !important;
+}
+.search-combo {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 彻底消除 Arco 默认 margin */
+.search-combo-item {
+  margin: 0 !important;
+}
+
+
+/* 先全部去掉圆角 */
+.search-combo-item :deep(.arco-select-view),
+.search-combo-item :deep(.arco-input-wrapper) {
+  border-radius: 0;
+}
+
+/* 左侧第一个：保留左圆角 */
+.search-combo-item:first-child
+:deep(.arco-select-view) {
+  border-radius: 6px 0 0 6px;
+}
+
+/* 右侧最后一个：保留右圆角 */
+.search-combo-item:last-child
+:deep(.arco-input-wrapper) {
+  border-radius: 0 6px 6px 0;
+}
+
+/* 中间边框去重（防止双边框） */
+.search-combo-item:not(:last-child)
+:deep(.arco-select-view) {
+  border-right: none;
+}
+.search-combo {
+  --arco-size-small-height: 28px;
+}
+.arco-select-view-single {
+  height: 28px !important;
+}
+/* 统一修改所有筛选字段的标签颜色为 #0b1019 */
+.arco-input-group .arco-input-wrapper.arco-input-disabled .arco-input {
+  color: #0b1019 !important;
+  -webkit-text-fill-color: #0b1019 !important;
+  font-size: 12px !important;
+}
+
+/* 统一修改日期筛选按钮颜色 */
+.date-type-btn .date-type-label,
+.date-type-btn .date-type-icon {
+  color: #0b1019 !important;
+  font-size: 12px !important;
+}
+/* a-card上的横线 */
+.card-divider {
+  height: 1px;
+  background-color: #e5e6eb; /* Arco 常用分割线颜色 */
+  margin-bottom: 3px;
+}
+/* 添加按钮外壳 */
+.table-actions {
+  display: flex;
+  justify-content: flex-start; /* 左对齐 */
+  align-items: center;
+  margin-bottom: 3px;
+  margin-left: 5px;
+}
+
 </style>
